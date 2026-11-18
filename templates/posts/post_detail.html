@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}پست {{ post.id }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="post-card">
+            <div class="post-header">
+                {% if post.author.profile.profile_picture %}
+                    <img src="{{ post.author.profile.profile_picture.url }}" class="avatar-sm" alt="avatar">
+                {% endif %}
+                <a href="{% url 'user_profile' post.author.email %}" class="fw-bold text-dark">
+                    {{ post.author.email }}
+                </a>
+                {% if post.author == user %}
+                    <a href="{% url 'post_delete' post.id %}" class="ms-auto text-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="post-image-container">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="Post">
+                {% elif post.video %}
+                    <video src="{{ post.video.url }}" controls></video>
+                {% endif %}
+            </div>
+
+            <div class="post-caption mt-3">
+                <strong>{{ post.author.email }}:</strong> {{ post.caption }}
+            </div>
+
+            <hr class="m-0">
+
+            <!-- کامنت‌ها -->
+            <div class="p-3" style="max-height: 300px; overflow-y: auto;">
+                {% for comment in comments %}
+                    <div class="mb-2">
+                        <strong>{{ comment.author.email }}</strong>: {{ comment.text }}
+                    </div>
+                {% empty %}
+                    <p class="text-muted text-center">هیچ کامنتی ثبت نشده است.</p>
+                {% endfor %}
+            </div>
+
+            <!-- فرم کامنت -->
+            <div class="p-3 border-top">
+                <form method="post" action="{% url 'add_comment' post.id %}" class="d-flex">
+                    {% csrf_token %}
+                    {{ comment_form.text }}
+                    <button type="submit" class="btn btn-primary ms-2" style="width: auto;">ارسال</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

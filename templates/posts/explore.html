@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}اکسپلور{% endblock %}
+{% block content %}
+<h3 class="mb-4">اکسپلور</h3>
+<div class="profile-grid">
+    {% for post in posts %}
+        <a href="{% url 'post_detail' post.id %}" class="profile-grid-item">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="Post">
+            {% elif post.video %}
+                <video src="{{ post.video.url }}"></video>
+            {% endif %}
+        </a>
+    {% empty %}
+        <p class="text-muted w-100 text-center">هنوز پستی وجود ندارد.</p>
+    {% endfor %}
+</div>
+{% endblock %}

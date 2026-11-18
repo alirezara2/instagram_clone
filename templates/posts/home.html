@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}خانه{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% for post in posts %}
+            <div class="post-card">
+                <!-- هدر پست -->
+                <div class="post-header">
+                    {% if post.author.profile.profile_picture %}
+                        <img src="{{ post.author.profile.profile_picture.url }}" class="avatar-sm" alt="avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-3 me-2 text-muted"></i>
+                    {% endif %}
+                    <a href="{% url 'user_profile' post.author.email %}" class="fw-bold text-dark">
+                        {{ post.author.email }}
+                    </a>
+                </div>
+
+                <!-- رسانه پست (عکس/ویدیو) -->
+                <div class="post-image-container">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post">
+                    {% elif post.video %}
+                        <video src="{{ post.video.url }}" controls></video>
+                    {% endif %}
+                </div>
+
+                <!-- دکمه‌های عملیات -->
+                <div class="post-actions">
+                    <button class="like-btn" data-post-id="{{ post.id }}">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                    <a href="{% url 'post_detail' post.id %}" class="text-dark">
+                        <i class="bi bi-chat"></i>
+                    </a>
+                    <span class="ms-2 fw-bold" style="font-size: 0.9rem;">
+                        <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span> لایک
+                    </span>
+                </div>
+
+                <!-- کپشن -->
+                <div class="post-caption">
+                    <a href="{% url 'user_profile' post.author.email %}" class="fw-bold text-dark me-2">
+                        {{ post.author.email }}
+                    </a>
+                    {{ post.caption }}
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center mt-5">
+                <h4 class="text-muted">هنوز پستی وجود ندارد!</h4>
+                <a href="{% url 'post_create' %}" class="btn btn-primary mt-3" style="width: auto;">اولین پست رو بساز</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const icon = this.querySelector('i');
+            
+            fetch(`/post/${postId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById(`like-count-${postId}`).textContent = data.total_likes;
+                if (data.liked) {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    icon.classList.remove('bi-heart-fill', 'text-danger');
+                    icon.classList.add('bi-heart');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}ورود{% endblock %}
+{% block content %}
+<div class="auth-box">
+    <h2>Instagram Clone</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-3">ورود</button>
+    </form>
+    <div class="text-center mt-4">
+        <p>حساب کاربری ندارید؟ <a href="{% url 'register' %}">ثبت‌نام</a></p>
+    </div>
+</div>
+{% endblock %}

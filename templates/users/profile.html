@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}پروفایل {{ profile_user.email }}{% endblock %}
+{% block content %}
+<div class="profile-header">
+    {% if profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" class="avatar-lg" alt="Profile">
+    {% else %}
+        <div class="avatar-lg bg-secondary d-flex align-items-center justify-content-center">
+            <i class="bi bi-person text-white" style="font-size: 5rem;"></i>
+        </div>
+    {% endif %}
+
+    <div class="ms-4 flex-grow-1">
+        <div class="d-flex align-items-center mb-3">
+            <h3 class="mb-0 me-3">{{ profile_user.email }}</h3>
+            {% if is_own_profile %}
+                <a href="{% url 'profile_edit' %}" class="btn btn-outline-secondary btn-sm">ویرایش پروفایل</a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm ms-2">خروج</a>
+            {% else %}
+                <button id="follow-btn" 
+                        class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %} btn-sm"
+                        data-email="{{ profile_user.email }}">
+                    {% if is_following %}دنبال کردن (لغو){% else %}دنبال کردن{% endif %}
+                </button>
+            {% endif %}
+        </div>
+        
+        <div class="profile-stats">
+            <div><span>{{ profile_user.posts.count }}</span> پست</div>
+            <div><span id="followers-count">{{ followers_count }}</span> فالوور</div>
+            <div><span>{{ following_count }}</span> فالووینگ</div>
+        </div>
+
+        <div>
+            <p class="mb-1 fw-bold">{{ profile.full_name }}</p>
+            <p class="mb-1">{{ profile.bio }}</p>
+            <p class="text-muted small">{{ profile.phone_number }}</p>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<div class="profile-grid">
+    {% for post in profile_user.posts.all %}
+        <a href="{% url 'post_detail' post.id %}" class="profile-grid-item">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="Post">
+            {% elif post.video %}
+                <video src="{{ post.video.url }}"></video>
+            {% endif %}
+        </a>
+    {% empty %}
+        <p class="text-muted w-100 text-center mt-4">هنوز پستی منتشر نشده است.</p>
+    {% endfor %}
+</div>
+
+{% if not is_own_profile %}
+<script>
+    document.getElementById('follow-btn').addEventListener('click', function() {
+        const btn = this;
+        const email = btn.dataset.email;
+        fetch(`/follow/${email}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('followers-count').textContent = data.followers_count;
+            if (data.is_following) {
+                btn.textContent = 'دنبال کردن (لغو)';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            } else {
+                btn.textContent = 'دنبال کردن';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-primary');
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

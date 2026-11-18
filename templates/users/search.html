@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}جستجو{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h3 class="mb-4">جستجوی کاربران</h3>
+        
+        <form method="get" action="{% url 'search' %}" class="d-flex mb-4">
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="ایمیل یا نام کاربر را وارد کنید...">
+            <button type="submit" class="btn btn-primary ms-2" style="width: auto;">جستجو</button>
+        </form>
+
+        {% if query %}
+            <h5 class="text-muted">نتایج برای "{{ query }}":</h5>
+            {% for u in users %}
+                <div class="d-flex align-items-center p-3 border-bottom">
+                    {% if u.profile.profile_picture %}
+                        <img src="{{ u.profile.profile_picture.url }}" class="avatar-sm me-2" alt="avatar">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-3 me-2 text-muted"></i>
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'user_profile' u.email %}" class="fw-bold text-dark">{{ u.email }}</a>
+                        <p class="mb-0 text-muted small">{{ u.profile.full_name }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted">کاربری یافت نشد.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
